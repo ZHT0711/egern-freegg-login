@@ -1,0 +1,67 @@
+name: FreeGG 每日登录巡检
+description: 每天自动登录 FreeGG（New API 网关），上报余额、累计消耗与调用次数；站点开放签到时自动签到并回报奖励。首次使用请先阅读 README。
+author: ZHT0711
+icon: gift.fill
+homepage: https://github.com/ZHT0711/egern-freegg-login
+manual: https://github.com/ZHT0711/egern-freegg-login/blob/main/README.md
+
+compat_arguments:
+  CRON: "30 8 * * *"
+  SCRIPT_URL: "https://raw.githubusercontent.com/ZHT0711/egern-freegg-login/main/freegg-login.js"
+  TOKEN_SCRIPT_URL: "https://raw.githubusercontent.com/ZHT0711/egern-freegg-login/main/freegg-token.js"
+
+env_schema:
+  ACCESS_TOKEN:
+    name: 访问令牌 access_token
+    description: 登录响应里的 data.access_token，仅 15 分钟有效。更推荐开启 MITM 用「令牌采集」自动续期。
+  USERNAME:
+    name: 账号
+    description: 网站账号或邮箱。站点启用 Turnstile 验证码时，账号密码无法自动登录。
+  PASSWORD:
+    name: 密码
+    description: 网站登录密码，首尾空格原样保留。
+  FREEGG_ACCOUNTS:
+    name: 多账号（JSON）
+    description: 选填，填写后优先使用列表；格式见 README。
+  FREEGG_BASE:
+    name: 站点地址
+    default_value: "https://freegg.app"
+    description: 默认 FreeGG 官网；换用其它 New API 站点时改这里。
+  FREEGG_ACCOUNT_KEY:
+    name: 本地账号槽位
+    default_value: default
+    description: 默认 default。不同槽位独立存储登录会话，方便多账号。
+  FREEGG_DEBUG:
+    name: 调试模式
+    description: 开启后输出请求状态与判定过程，排查问题时用。
+    options:
+      - "true"
+      - "false"
+
+scriptings:
+  - schedule:
+      name: FreeGG 每日登录
+      cron: "{{{CRON}}}"
+      script_url: "{{{SCRIPT_URL}}}"
+      timeout: 120
+      update_interval: 86400
+  - http_request:
+      name: FreeGG 请求采集
+      match: ^https://freegg\.app/api/user/
+      script_url: "{{{TOKEN_SCRIPT_URL}}}"
+      body_required: false
+      timeout: 10
+      update_interval: 86400
+  - http_response:
+      name: FreeGG 响应采集
+      match: ^https://freegg\.app/api/user/(?:login|auth/refresh)(?:\?|$)
+      script_url: "{{{TOKEN_SCRIPT_URL}}}"
+      body_required: true
+      max_size: 131072
+      timeout: 10
+      update_interval: 86400
+
+mitm:
+  hostnames:
+    includes:
+      - freegg.app
