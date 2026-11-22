@@ -1,12 +1,12 @@
-name: FreeGG 每日登录巡检
-description: 每天自动登录 FreeGG（New API 网关），上报余额、累计消耗与调用次数；站点开放签到时自动签到并回报奖励。首次使用请先阅读 README。
+name: FreeGG 每日额度
+description: 每天自动完成一次「已登录访问」触发 FreeGG（New API 网关）的每日额度发放，并用服务端日志确认奖励是否到账；同时上报余额、累计消耗与调用次数。首次使用请先阅读 README。
 author: ZHT0711
 icon: gift.fill
 homepage: https://github.com/ZHT0711/egern-freegg-login
 manual: https://github.com/ZHT0711/egern-freegg-login/blob/main/README.md
 
 compat_arguments:
-  CRON: "30 8 * * *"
+  CRON: "10 9 * * *"
   SCRIPT_URL: "https://raw.githubusercontent.com/ZHT0711/egern-freegg-login/main/freegg-login.js"
   TOKEN_SCRIPT_URL: "https://raw.githubusercontent.com/ZHT0711/egern-freegg-login/main/freegg-token.js"
 
@@ -40,7 +40,7 @@ env_schema:
 
 scriptings:
   - schedule:
-      name: FreeGG 每日登录
+      name: FreeGG 每日额度
       cron: "{{{CRON}}}"
       script_url: "{{{SCRIPT_URL}}}"
       timeout: 120
